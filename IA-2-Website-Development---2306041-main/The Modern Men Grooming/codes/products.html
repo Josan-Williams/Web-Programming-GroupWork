@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Modern Man Grooming</title>
+    <link rel="stylesheet" href="../style.css">
+    <script defer src="../script.js"></script>
+</head>
+<body>
+
+    <header class="navbar">
+  <h1>The Modern Man Grooming</h1>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="products.html">Products</a>
+    <a href="cart.html">Cart</a>
+    <a href="login.html">Login</a>
+    <a href="register.html">Register</a>
+    <a href="about.html">About Us</a>
+    <a href="#" onclick="logoutUser()">Logout</a>
+  </nav>
+</header>
+
+<section class="page-header">
+  <h2>All Products</h2>
+  <p>Browse premium grooming essentials for the modern man.</p>
+</section>
+
+
+    <main>
+        <div class="product-container">
+
+            <div class="product">
+                <img src ="../Assets/beardoil.webp" alt="Beard Oil">
+                <h3>Beard Oil</h3>
+                <p>$2000</p>
+                <button onclick="addToCart('Beard Oil', 2000, '../Assets/Beardoil.webp')">Add to Cart</button>
+
+            </div>
+
+            <div class="product">
+                <img src="../Assets/beardbalm.webp" alt="Beard Baalm">
+                <h3>Beard Balm</h3>
+                <p>$1500</p>
+                <button onclick="addToCart('Beard Comb', 1500, '../Assets/beardbalm.webp')">Add to Cart</button>
+            </div>
+
+            <div class="product">
+                <img src="../Assets/pomade.webp" alt="Pomade">
+                <h3>Hair Pomade</h3>
+                <p>$1800</p>
+                <button onclick="addToCart('Beard Balm', 1800, '../Assets/pomade.webp')">Add to Cart</button>
+            </div>
+        
+        </div>        
+    </main>
+
+    <footer>
+        <p>© 2025 The Modern Man Grooming</p>
+    </footer>
+
+</body>
+</html>

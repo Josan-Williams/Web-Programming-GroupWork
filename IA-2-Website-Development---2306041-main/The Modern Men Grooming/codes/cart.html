@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Modern Man Grooming</title>
+    <link rel="stylesheet" href="../style.css">
+    <script defer src="../script.js"></script>
+</head>
+<body>
+
+    <header>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="products.html">Products</a>
+            <a href="cart.html">Cart</a>
+            <a href="login.html">Login</a>
+            <a href="register.html">Register</a>
+            <a href="about.html">About Us</a>
+            <a href="#" onclick="logoutUser()">Logout</a>
+        </nav>
+    </header>
+
+    <section class="cart-wrapper">
+  <h2>Your Cart</h2>
+
+  <table class="cart-table">
+    <thead>
+      <tr>
+        <th>Image</th>
+        <th>Item</th>
+        <th>Price</th>
+        <th>Qty</th>
+        <th>Controls</th>
+        <th>Subtotal</th>
+      </tr>
+    </thead>
+    <tbody id="cartItems">
+      <!-- JS will fill this -->
+    </tbody>
+  </table>
+
+  <div class="cart-summary">
+    <p>Discount: $<span id="discount">0.00</span></p>
+    <p>Tax: $<span id="tax">0.00</span></p>
+    <p><strong>Total: $<span id="total">0.00</span></strong></p>
+  </div>
+
+  <div class="cart-actions">
+    <button onclick="clearCart()">Clear Cart</button>
+    <button onclick="goCheckout()">Checkout</button>
+  </div>
+</section>
+
+    <footer>
+        <p>© 2025 The Modern Man Grooming</p>
+    </footer>
+
+</body>
+</html>
