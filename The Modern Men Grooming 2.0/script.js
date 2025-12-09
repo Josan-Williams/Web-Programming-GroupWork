@@ -2,8 +2,6 @@ console.log("Script loaded succesfully.");
 
 let cart = JSON.parse(localStorage.getItem("cart"))||[];
 
-
-
 function displayCart() {
     const tableBody = document.getElementById("cartItems");
     const discountEl = document.getElementById("discount");
@@ -217,7 +215,7 @@ function handleRegister(event) {
         trn: trn,
         password: password,
         dateOfRegistration: new Date().toISOString(), // store timestamp
-        cart: {},
+        cart: [],
         invoices: []
     };
 
