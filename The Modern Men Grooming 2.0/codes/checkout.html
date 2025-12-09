@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - The Modern Man Grooming</title>
+    <link rel="stylesheet" href="../style.css">
+    <script defer src="../script.js"></script>
+</head>
+<body>
+
+<header>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="products.html">Products</a>
+        <a href="cart.html">Cart</a>
+        <a href="login.html">Login</a>
+        <a href="register.html">Register</a>
+        <a href="invoices.html">Invoices</a>
+        <a href="about.html">About Us</a>
+    </nav>
+</header>
+
+<main>
+    <h2>Checkout</h2>
+
+    <!-- Shipping Info Form -->
+    <form id="checkoutForm" onsubmit="event.preventDefault(); confirmOrder();">
+        <label for="fullName">Full Name:</label>
+        <input type="text" id="fullName" required>
+
+        <label for="address">Shipping Address:</label>
+        <input type="text" id="address" required>
+
+        <label for="city">City:</label>
+        <input type="text" id="city" required>
+
+        <label for="postalCode">Postal Code:</label>
+        <input type="text" id="postalCode" required>
+
+        <label for="country">Country:</label>
+        <input type="text" id="country" required>
+
+        <h3>Cart Summary</h3>
+        <table id="checkoutCart" border="1" cellpadding="10">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody id="checkoutItems"></tbody>
+        </table>
+
+        <p>Discount: $<span id="checkoutDiscount">0.00</span></p>
+        <p>Tax: $<span id="checkoutTax">0.00</span></p>
+        <h3>Total: $<span id="checkoutTotal">0.00</span></h3>
+
+        <button type="submit">Confirm</button>
+        <button type="button" onclick="cancelOrder()">Cancel</button>
+    </form>
+</main>
+
+<footer>
+    <p>© 2025 The Modern Man Grooming</p>
+</footer>
+
+</body>
+</html>
