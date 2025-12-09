@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Modern Man Grooming</title>
+    <link rel="stylesheet" href="../style.css">
+    <script defer src="script.js"></script>
+</head>
+<body>
+
+    <header>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="products.html">Products</a>
+            <a href="cart.html">Cart</a>
+            <a href="login.html">Login</a>
+            <a href="register.html">Register</a>
+            <a href="about.html">About Us</a>
+        </nav>
+    </header>
+
+<main class="auth-page">
+  <div class="auth-card">
+  <h2>Create an Account</h2>
+
+  <form id="registerForm" onsubmit="return handleRegister(event)">
+    
+    <div class="form-group">
+      <label for="firstName">First Name</label>
+      <input id="firstName" type="text" required>
+    </div>
+
+    <div class="form-group">
+      <label for="lastName">Last Name</label>
+      <input id="lastName" type="text" required>
+    </div>
+
+    <div class="form-group">
+      <label for="dob">Date of Birth</label>
+      <input id="dob" type="date" required>
+    </div>
+
+    <div class="form-group">
+      <label for="gender">Gender</label>
+      <select id="gender" required>
+        <option value="">-- Select --</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="phone">Phone Number</label>
+      <input id="phone" type="tel" required>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input id="email" type="email" required>
+    </div>
+
+    <div class="form-group">
+      <label for="trn">TRN (000-000-000)</label>
+      <input id="trn" type="text" placeholder="123-456-789" required>
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password (min 8 characters)</label>
+      <input id="password" type="password" minlength="8" required>
+    </div>
+
+    <div class="form-actions row-buttons">
+      <button type="submit">Register</button>
+      <button type="button" onclick="clearRegisterForm()">Cancel</button>
+    </div>
+
+    <p id="registerError" class="error-msg"></p>
+    <p id="registerSuccess" class="success-msg"></p>
+
+  </form>
+</main>
+
+
+    <footer>
+        <p>© 2025 The Modern Man Grooming</p>
+    </footer>
+
+</body>
+</html>
