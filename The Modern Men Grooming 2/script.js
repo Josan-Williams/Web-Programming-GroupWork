@@ -191,35 +191,65 @@ function handleRegister(event) {
     // ii. HTML validation already ensures required fields,
     // but we'll add JS error messages too.
 
+    let booleanValid = true;
     // iii. Password must be at least 8 characters
-    if (password.length < 8) {
+    function validatePassword(pw) {
+        if (password.length < 8) {
         errorEl.textContent = "Password must be at least 8 characters long.";
         return false;
+      }
     }
 
     // iv. Visitor must be over 18
-    if (!isOver18(dob)) {
-        errorEl.textContent = "You must be at least 18 years old to register.";
-        return false;
+    function validateDOB(dob) {
+      if (!isOver18(dob)) {
+          errorEl.textContent = "You must be at least 18 years old to register.";
+          return false;
+      } 
     }
 
     // v. TRN format: 000-000-000
-    const trnPattern = /^\d{3}-\d{3}-\d{3}$/;
-    if (!trnPattern.test(trn)) {
-        errorEl.textContent = "TRN must be in the format 000-000-000.";
-        return false;
+    function validateTRN(trn) {
+      const trnPattern = /^\d{3}-\d{3}-\d{3}$/;
+      if (!trnPattern.test(trn)) {
+          errorEl.textContent = "TRN must be in the format 000-000-000.";
+          return false;
+      }
     }
-
     // vi. Check TRN uniqueness in RegistrationData
     let registrations = JSON.parse(localStorage.getItem("RegistrationData")) || [];
 
     const trnExists = registrations.some(user => user.trn === trn);
-    if (trnExists) {
-        errorEl.textContent = "This TRN is already registered. Please log in.";
-        return false;
+    function checkTRNUniqueness(trnExists) {
+      if (trnExists) {
+          errorEl.textContent = "This TRN is already registered. Please log in.";
+          return false;
+      }
     }
 
+    // vii. Validate gender selection is valid
+    const genderOptions = ["Male", "Female", "Other"];
+    function validateGender(gender) {
+      if (!genderOptions.includes(gender)) {
+          errorEl.textContent = "Please select a valid gender.";
+          return false;
+      }
+    }
+    
+    // Run validations
+    if ((validateDOB(dob) === false) || 
+        (validateTRN(trn) === false) || 
+        (validatePassword(password) === false) ||
+        (checkTRNUniqueness(trnExists) === false) ||
+        (validateGender(gender) === false)) {
+          booleanValid = false;
+    }
     // Create registration object
+    if (booleanValid === false) { 
+      handleRegister = false; 
+      return errorEl.textContent = "Registration failed. Please correct the errors and try again.";
+    }
+    
     const newUser = {
         firstName: firstName,
         lastName: lastName,
@@ -235,18 +265,19 @@ function handleRegister(event) {
     };
 
     // Push to array and save back to localStorage
-    registrations.push(newUser);
-    localStorage.setItem("RegistrationData", JSON.stringify(registrations));
+    if (booleanValid === true) {
+      registrations.push(newUser);
+      localStorage.setItem("RegistrationData", JSON.stringify(registrations));
+      successEl.textContent = "Registration successful! You can now log in.";
+    }
 
-    successEl.textContent = "Registration successful! You can now log in.";
-    
     // Optional: redirect after short delay
     setTimeout(() => {
         window.location.href = "login.html";
     }, 1500);
 
     return false;
-}
+   }
 
 // === Helper: Calculate age and ensure 18+ ===
 function isOver18(dobString) {
@@ -323,8 +354,8 @@ console.log("Script loaded successfully.");
 // Sample products (saved once in localStorage)
 let AllProducts = [
   { id: 1, name: "Beard Oil", price: 2000, description: "Keeps beard soft, shiny, and healthy.", image: "../Assets/beardoil.webp" },
-  { id: 2, name: "Beard Balm", price: 1500, description: "Moisturizes and strengthens your beard.", image: "Assets/beardbalm.webp" },
-  { id: 3, name: "Hair Pomade", price: 1800, description: "Strong hold with a natural shine.", image: "Assets/pomade.webp" }
+  { id: 2, name: "Beard Balm", price: 1500, description: "Moisturizes and strengthens your beard.", image: "../Assets/beardbalm.webp" },
+  { id: 3, name: "Hair Pomade", price: 1800, description: "Strong hold with a natural shine.", image: "../Assets/pomade.webp" }
 ];
 
 if (!localStorage.getItem("AllProducts")) {
