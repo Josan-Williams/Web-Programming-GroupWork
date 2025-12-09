@@ -537,6 +537,7 @@ function confirmOrder() {
         })),
         subtotal,
         tax: totalTax,
+        discount: totalDiscount,
         total
     };
 
@@ -625,44 +626,73 @@ function loadInvoices() {
     let output = "";
     user.invoices.forEach((inv, index) => {
         output += `
-        <div class="invoice-card">
-            <h3>Invoice #${inv.invoiceNumber}</h3>
-            <p><strong>Date:</strong> ${inv.invoiceDate}</p>
-            <p><strong>TRN:</strong> ${inv.trn}</p>
-            <p><strong>Shipping:</strong> ${JSON.stringify(inv.shippingInfo)}</p>
-            <table border="1" cellpadding="5">
+        <div class="auth-card" style="max-width: 900px; margin: 30px auto; padding: 30px;">
+            <h2 style="text-align: center; color: var(--secondary);">INVOICE</h2>
+            
+            <div style="margin-bottom: 25px;">
+                <p><strong>Company:</strong> ${inv.companyName}</p>
+                <p><strong>Invoice Number:</strong> ${inv.invoiceNumber}</p>
+                <p><strong>Date of Invoice:</strong> ${inv.invoiceDate}</p>
+                <p><strong>TRN:</strong> ${inv.trn}</p>
+            </div>
+
+            <h3 style="color: var(--secondary); margin-top: 25px; margin-bottom: 10px;">Shipping Information</h3>
+            <div style="margin-bottom: 25px;">
+                <p><strong>Name:</strong> ${inv.shippingInfo.fullName}</p>
+                <p><strong>Address:</strong> ${inv.shippingInfo.address}</p>
+                <p><strong>City:</strong> ${inv.shippingInfo.city}</p>
+                <p><strong>Postal Code:</strong> ${inv.shippingInfo.postalCode}</p>
+                <p><strong>Country:</strong> ${inv.shippingInfo.country}</p>
+            </div>
+
+            <h3 style="color: var(--secondary); margin-top: 25px; margin-bottom: 15px;">Purchased Items</h3>
+            <table border="1" cellpadding="10" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
                 <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>Qty</th>
+                    <tr style="background: #000;">
+                        <th>Item Name</th>
+                        <th>Quantity</th>
                         <th>Price</th>
                         <th>Discount</th>
                         <th>Subtotal</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${inv.items.map(item => `
+                    ${inv.items.map(item => {
+                        const itemSubtotal = (item.price * item.qty) - item.discount;
+                        return `
                         <tr>
                             <td>${item.name}</td>
                             <td>${item.qty}</td>
                             <td>$${item.price.toFixed(2)}</td>
                             <td>$${item.discount.toFixed(2)}</td>
-                            <td>$${(item.price * item.qty - item.discount).toFixed(2)}</td>
+                            <td>$${itemSubtotal.toFixed(2)}</td>
                         </tr>
-                    `).join("")}
+                        `;
+                    }).join('')}
                 </tbody>
             </table>
-            <p><strong>Tax:</strong> $${inv.tax.toFixed(2)}</p>
-            <p><strong>Total:</strong> $${inv.total.toFixed(2)}</p>
+
+            <div style="text-align: right; margin-top: 20px;">
+                <p><strong>Subtotal:</strong> $${inv.subtotal.toFixed(2)}</p>
+                <p><strong>Taxes:</strong> $${inv.tax.toFixed(2)}</p>
+                <p><strong>Total Discount:</strong> $${inv.discount.toFixed(2)}</p>
+                <p style="font-size: 1.3rem; color: var(--secondary); font-weight: bold; margin-top: 10px;">
+                    <strong>Total Cost:</strong> $${inv.total.toFixed(2)}
+                </p>
+            </div>
+
+            <div class="row-buttons" style="margin-top: 30px;">
+                <button type="button" onclick="window.print()">Print Invoice</button>
+            </div>
         </div>
-        <hr>
+        <hr style="border: 1px solid #333; margin: 40px 0;">
         `;
     });
 
     invoiceListEl.innerHTML = output;
 }
 
-// Run when invoices.html loads
+// Run when invoice.html loads
 if (document.title.includes("Invoices")) {
     loadInvoices();
 }
