@@ -48,8 +48,8 @@ function displayCart() {
         `;
     });
 
-    const discount = subtotal * 0.10; // example 10% discount
-    const tax = subtotal * 0.15; // example 15% tax
+    const discount = subtotal * 0.10; // 10% discount
+    const tax = subtotal * 0.15; // 15% tax
     const total = subtotal - discount + tax;
 
     tableBody.innerHTML = output;
@@ -58,8 +58,6 @@ function displayCart() {
     totalEl.innerText = total.toFixed(2);
 }
 
-
-
 if (document.getElementById("cartItems")) {
     displayCart();
 }
@@ -67,8 +65,6 @@ if (document.getElementById("cartItems")) {
 window.onload = () => {
   displayCart();
 };
-
-
 
 function clearCart() {
     const userJSON = localStorage.getItem("LoggedInUser");
@@ -86,7 +82,6 @@ function goCheckout(){
     window.location.href = "checkout.html";
 }
 
-
 function displayCheckout() {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
     let total = 0;
@@ -99,18 +94,13 @@ function displayCheckout() {
         "Total: $" + total.toFixed(2);
 }
 
-
-
 if (document.title.includes("Checkout")) {
     displayCheckout();
 }
 
-
-
 function cancelOrder() {
     window.location.href = "cart.html";
 }
-
 
 function goCheckout(){
     let loggedIn = localStorage.getItem("loggedIn");
@@ -303,10 +293,7 @@ function handleLogin(event) {
     return false;
 }
 
-
-
 // ===== Cart & E-Commerce Script =====
-
 console.log("Script loaded successfully.");
 
 let AllProducts = [
@@ -318,7 +305,6 @@ let AllProducts = [
 if (!localStorage.getItem("AllProducts")) {
   localStorage.setItem("AllProducts", JSON.stringify(AllProducts));
 }
-
 
 // ===== Display Products =====
 function loadProducts() {
@@ -381,8 +367,6 @@ function addToCart(productID) {
   alert(`${item.name} added to cart!`);
 }
 
-
-
 // ===== Display Cart =====
 function loadCart() {
   const tableBody = document.getElementById("cartItems");
@@ -429,8 +413,6 @@ function loadCart() {
   totalBox.innerHTML = `<strong>Total: $${total.toFixed(2)}</strong>`;
 }
 
-
-
 // ===== Increase / Decrease Quantity =====
 function increaseQty(index) {
     const user = JSON.parse(localStorage.getItem("LoggedInUser"));
@@ -446,7 +428,6 @@ function decreaseQty(index) {
     localStorage.setItem("LoggedInUser", JSON.stringify(user));
     displayCart(); // update immediately
 }
-
 
 // ===== Clear Cart =====
 function clearCart() {
@@ -482,7 +463,6 @@ function displayCheckout() {
   const totalEl = document.getElementById("checkoutTotal");
   if (totalEl) totalEl.innerText = "Total: $" + total.toFixed(2);
 }
-
 
 // ===== Load Page =====
 window.onload = () => {
@@ -557,11 +537,9 @@ function confirmOrder() {
     window.location.href = "index.html";
 }
 
-
 function cancelOrder() {
     window.location.href = "cart.html";
 }
-
 
 function loadCheckoutCart() {
     const userJSON = localStorage.getItem("LoggedInUser");
@@ -598,7 +576,8 @@ function loadCheckoutCart() {
 
     document.getElementById("checkoutDiscount").innerText = totalDiscount.toFixed(2);
     document.getElementById("checkoutTax").innerText = totalTax.toFixed(2);
-    document.getElementById("checkoutTotal").innerText = (subtotal + totalTax - totalDiscount).toFixed(2);
+    // Final total calculation needs to be fixed to allow tax and discount on overall subtotal
+    document.getElementById("checkoutTotal").innerText = ((item.price * item.qty + inv.tax) - item.discount).toFixed(2);
 }
 
 // Call on window load
@@ -606,17 +585,24 @@ if (document.title.includes("Checkout")) {
     window.onload = loadCheckoutCart;
 }
 
+// === Load and Display Invoices ===
 function loadInvoices() {
+    preventDefault();
     const invoiceListEl = document.getElementById("invoiceList");
     if (!invoiceListEl) return;
 
     const loggedUserJSON = localStorage.getItem("LoggedInUser");
     if (!loggedUserJSON) {
         invoiceListEl.innerHTML = "<p>Please log in to view invoices.</p>";
+        alert("No user logged in.");
         return;
     }
 
     const user = JSON.parse(loggedUserJSON);
+    if (!user.cart || user.cart.length === 0) {
+        alert("Cart is empty.");
+        return;
+    }
 
     if (!user.invoices || user.invoices.length === 0) {
         invoiceListEl.innerHTML = "<p>No invoices found.</p>";
@@ -658,7 +644,7 @@ function loadInvoices() {
                 </thead>
                 <tbody>
                     ${inv.items.map(item => {
-                        const itemSubtotal = (item.price * item.qty) - item.discount;
+                        const itemSubtotal = (item.price * item.qty + inv.tax) - item.discount;
                         return `
                         <tr>
                             <td>${item.name}</td>
@@ -690,6 +676,59 @@ function loadInvoices() {
     });
 
     invoiceListEl.innerHTML = output;
+
+/*
+5b.	Append this invoice to the user’s array of invoices (array of objects).
+    Also store the invoice to localStorage with the key called AllInvoices
+    (as an array of objects) to access later.
+*/
+    // Append invoice to user's array of invoices (b)
+    if (!user.invoices) {
+        user.invoices = [];
+    }
+    user.invoices.push(invoice);
+
+    // Save updated user back to localStorage (b)
+    localStorage.setItem("LoggedInUser", JSON.stringify(user));
+
+    // Append invoice to AllInvoices array and store in localStorage (b)
+    const allInvoices = JSON.parse(localStorage.getItem("AllInvoices") || "[]");
+    allInvoices.push(invoice);
+    localStorage.setItem("AllInvoices", JSON.stringify(allInvoices));
+
+    showInvoiceSentMessage();
+
+    // Clear cart
+    user.cart = [];
+    localStorage.setItem("LoggedInUser", JSON.stringify(user));
+    window.location.href = "index.html";
+
+    return invoice;
+}
+
+// === Requirement (c): Show invoice sent message ===
+function showInvoiceSentMessage1() {
+    alert("Invoice generated and sent to your email.");
+}
+
+function showInvoiceSentMessage() {
+    const messageDiv = document.createElement("div");
+    messageDiv.style.position = "fixed";
+    messageDiv.style.top = "20px";
+    messageDiv.style.right = "20px";
+    messageDiv.style.backgroundColor = "#4CAF50";
+    messageDiv.style.color = "#fff";
+    messageDiv.style.padding = "15px 20px";
+    messageDiv.style.borderRadius = "5px";
+    messageDiv.style.zIndex = "9999";
+
+    messageDiv.textContent = "Invoice has been sent to your email.";
+
+    document.body.appendChild(messageDiv);
+
+    setTimeout(() => {
+        document.body.removeChild(messageDiv);
+    }, 4000);
 }
 
 // Run when invoice.html loads
@@ -697,13 +736,151 @@ if (document.title.includes("Invoices")) {
     loadInvoices();
 }
 
-
 // Load invoices when page loads
 if (document.title.includes("Invoices")) {
     window.onload = loadInvoices;
 }
 
+function userFrequency() {
+    const user = [];
+    const form = document.getElementById('registerForm');
 
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value.trim();
+      const age = parseInt(document.getElementById('age').value, 10);
+      const gender = document.getElementById('gender').value;
+
+      if (!name || !age || !gender) return;
+
+      // Save user data
+      users.push({ name, age, gender });
+
+      // Clear form
+      form.reset();
+
+      // Update dashboard
+      updateDashboard();
+    });
+
+    function updateDashboard() {
+      // Gender counts
+      let male = 0, female = 0, other = 0;
+
+      // Age group counts
+      let age18_25 = 0, age26_35 = 0, age36_50 = 0, age50plus = 0;
+
+      users.forEach(user => {
+        // Gender
+        if (user.gender === 'Male') male++;
+        else if (user.gender === 'Female') female++;
+        else other++;
+
+        // Age groups
+        if (user.age >= 18 && user.age <= 25) age18_25++;
+        else if (user.age >= 26 && user.age <= 35) age26_35++;
+        else if (user.age >= 36 && user.age <= 50) age36_50++;
+        else if (user.age > 50) age50plus++;
+      });
+
+      // Update gender cards
+      document.getElementById('maleCount').textContent = male;
+      document.getElementById('femaleCount').textContent = female;
+      document.getElementById('otherCount').textContent = other;
+
+      // Update age table
+      document.getElementById('age18_25').textContent = age18_25;
+      document.getElementById('age26_35').textContent = age26_35;
+      document.getElementById('age36_50').textContent = age36_50;
+      document.getElementById('age50plus').textContent = age50plus;
+    }
+
+    function ShowInvoices() {
+    let invoices = JSON.parse(localStorage.getItem("AllInvoices")) || [];
+    console.log("All invoices:", invoices);
+
+    let table = document.getElementById("invoiceTable");
+    table.innerHTML = `
+        <tr>
+            <th>TRN</th><th>Name</th><th>Amount</th><th>Date</th>
+        </tr>
+    `;
+
+    invoices.forEach(inv => {
+        table.innerHTML += `
+            <tr>
+                <td>${inv.trn}</td>
+                <td>${inv.name}</td>
+                <td>${inv.amount}</td>
+                <td>${inv.date}</td>
+            </tr>
+        `;
+    });
+}
+
+/* -------------------------
+   SEARCH INVOICE BY TRN
+--------------------------*/
+function searchInvoice() {
+    let searchTRN = document.getElementById("searchTRN").value.trim();
+    let invoices = JSON.parse(localStorage.getItem("AllInvoices")) || [];
+
+    let result = invoices.filter(inv => inv.trn === searchTRN);
+
+    console.log("Search result for TRN:", searchTRN, result);
+
+    let table = document.getElementById("invoiceTable");
+    table.innerHTML = `
+        <tr><th>TRN</th><th>Name</th><th>Amount</th><th>Date</th></tr>
+    `;
+
+    result.forEach(inv => {
+        table.innerHTML += `
+            <tr>
+                <td>${inv.trn}</td>
+                <td>${inv.name}</td>
+                <td>${inv.amount}</td>
+                <td>${inv.date}</td>
+            </tr>
+        `;
+    });
+}
+
+
+/* -------------------------
+   GET USER INVOICES
+--------------------------*/
+function GetUserInvoices() {
+    let trn = document.getElementById("userTRN").value.trim();
+    let invoices = JSON.parse(localStorage.getItem("AllInvoices")) || [];
+
+    let userInvoices = invoices.filter(inv => inv.trn === trn);
+
+    console.log("Invoices for user TRN:", trn, userInvoices);
+
+    let table = document.getElementById("userInvoiceTable");
+    table.innerHTML = `
+        <tr><th>TRN</th><th>Name</th><th>Amount</th><th>Date</th></tr>
+    `;
+
+    userInvoices.forEach(inv => {
+        table.innerHTML += `
+            <tr id="invoiceRow">
+                <td>${inv.trn}</td>
+                <td>${inv.name}</td>
+                <td>${inv.amount}</td>
+                <td>${inv.date}</td>
+            </tr>
+        `;
+    });
+}
+
+
+// Load everything on page load
+ShowUserFrequency();
+ShowInvoices();
+}
 window.addEventListener("load", () => {
   if (document.title.includes("Invoices")) loadInvoices();
   if (document.title.includes("Checkout")) loadCheckoutCart();

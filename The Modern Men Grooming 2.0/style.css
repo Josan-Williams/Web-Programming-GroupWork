@@ -19,8 +19,35 @@ body {
   color: var(--text);
   line-height: 1.6;
 }
+/* == CONTAINER === */
+.container {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  max-width: 900px;
+  margin: auto;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+}
 
+.card {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 16px;
+  min-width: 180px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background: #fff;
+  color: #000;
+  margin: 15px;
+}
 
+#userInvoiceTable{ border-collapse: collapse; width: 100%; margin-top: 10px; }
+#invoiceTable{ border-collapse: collapse; width: 100%; margin-top: 10px; }
+#ufTable{ border-collapse: collapse; width: 100%; margin-top: 10px; border: 1px solid var(--white); }
+#tableHeader, td { border: 1px solid var(--dark); padding: 6px 10px; text-align: center; }
+#tableHeader2 { color: var(--primary); margin-bottom: 15px; }
+
+/* === NAVBAR === */
 .navbar {
   background: var(--primary);
   display: flex;
@@ -30,6 +57,13 @@ body {
   flex-wrap: wrap;
   font-size: 1.1rem;
   min-height: 80px; 
+}
+
+#invoiceRow {
+  border-bottom: 1px solid var(--dark);
+  color: var(--secondary);
+  text-decoration: none;
+  background: #000;
 }
 
 .navbar h1 {
@@ -96,7 +130,6 @@ nav a:hover {
     background: #fff;
     color: #000;
 }
-
 
 .product-container {
   display: grid;
