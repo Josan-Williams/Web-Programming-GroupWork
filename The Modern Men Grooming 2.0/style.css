@@ -459,6 +459,27 @@ button {
 .uf-container {
     margin-top: 20px;
 }
+.uf-nav {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    padding-right: 20px;
+}
+
+.uf-nav a {
+    color: black;
+    background: gold;
+    padding: 8px 14px;
+    border-radius: 12px;
+    text-decoration: none;     /* Remove blue underline */
+    font-weight: 600;
+    transition: 0.25s;
+}
+
+.uf-nav a:hover {
+    background: white;
+    color: gold
+}
 
 /* Cards */
 .uf-card {
@@ -508,6 +529,7 @@ button {
     color: white;
     border: 1px solid gold;
 }
+
 
 
 
