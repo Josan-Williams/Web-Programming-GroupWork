@@ -62,10 +62,6 @@ if (document.getElementById("cartItems")) {
     displayCart();
 }
 
-window.onload = () => {
-  displayCart();
-};
-
 function clearCart() {
     const userJSON = localStorage.getItem("LoggedInUser");
     if (!userJSON) return;
@@ -140,7 +136,7 @@ if (loggedInUser) {
 function logout() {
     localStorage.removeItem("loggedIn");
     localStorage.removeItem("username");
-    alert("You’ve been logged out.");
+    alert("You've been logged out.");
     window.location.href = "index.html";
 }
 
@@ -429,19 +425,6 @@ function decreaseQty(index) {
     displayCart(); // update immediately
 }
 
-// ===== Clear Cart =====
-function clearCart() {
-    const userJSON = localStorage.getItem("LoggedInUser");
-    if (!userJSON) return;
-
-    const user = JSON.parse(userJSON);
-    user.cart = []; // empty the cart
-    localStorage.setItem("LoggedInUser", JSON.stringify(user));
-
-    alert("Cart cleared!");
-    displayCart(); // immediately update the table
-}
-
 // ===== Checkout =====
 function goCheckout() {
   const user = JSON.parse(localStorage.getItem("LoggedInUser"));
@@ -463,13 +446,6 @@ function displayCheckout() {
   const totalEl = document.getElementById("checkoutTotal");
   if (totalEl) totalEl.innerText = "Total: $" + total.toFixed(2);
 }
-
-// ===== Load Page =====
-window.onload = () => {
-  loadProducts();
-  loadCart();
-  displayCheckout();
-};
 
 function confirmOrder() {
     const userJSON = localStorage.getItem("LoggedInUser");
@@ -576,36 +552,24 @@ function loadCheckoutCart() {
 
     document.getElementById("checkoutDiscount").innerText = totalDiscount.toFixed(2);
     document.getElementById("checkoutTax").innerText = totalTax.toFixed(2);
-    // Final total calculation needs to be fixed to allow tax and discount on overall subtotal
-    document.getElementById("checkoutTotal").innerText = ((item.price * item.qty + inv.tax) - item.discount).toFixed(2);
-}
-
-// Call on window load
-if (document.title.includes("Checkout")) {
-    window.onload = loadCheckoutCart;
+    document.getElementById("checkoutTotal").innerText = ((subtotal + totalTax) - totalDiscount).toFixed(2);
 }
 
 // === Load and Display Invoices ===
 function loadInvoices() {
-    preventDefault();
     const invoiceListEl = document.getElementById("invoiceList");
     if (!invoiceListEl) return;
 
     const loggedUserJSON = localStorage.getItem("LoggedInUser");
     if (!loggedUserJSON) {
-        invoiceListEl.innerHTML = "<p>Please log in to view invoices.</p>";
-        alert("No user logged in.");
+        invoiceListEl.innerHTML = "<p style='text-align: center; color: var(--secondary); padding: 40px;'>Please log in to view invoices.</p>";
         return;
     }
 
     const user = JSON.parse(loggedUserJSON);
-    if (!user.cart || user.cart.length === 0) {
-        alert("Cart is empty.");
-        return;
-    }
 
     if (!user.invoices || user.invoices.length === 0) {
-        invoiceListEl.innerHTML = "<p>No invoices found.</p>";
+        invoiceListEl.innerHTML = "<p style='text-align: center; color: var(--secondary); padding: 40px;'>No invoices found.</p>";
         return;
     }
 
@@ -634,7 +598,7 @@ function loadInvoices() {
             <h3 style="color: var(--secondary); margin-top: 25px; margin-bottom: 15px;">Purchased Items</h3>
             <table border="1" cellpadding="10" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
                 <thead>
-                    <tr style="background: #000;">
+                    <tr id="invoiceRow" style="background: #000;">
                         <th>Item Name</th>
                         <th>Quantity</th>
                         <th>Price</th>
@@ -644,9 +608,9 @@ function loadInvoices() {
                 </thead>
                 <tbody>
                     ${inv.items.map(item => {
-                        const itemSubtotal = (item.price * item.qty + inv.tax) - item.discount;
+                        const itemSubtotal = (item.price * item.qty) - item.discount;
                         return `
-                        <tr>
+                        <tr id="invoiceRow">
                             <td>${item.name}</td>
                             <td>${item.qty}</td>
                             <td>$${item.price.toFixed(2)}</td>
@@ -676,34 +640,6 @@ function loadInvoices() {
     });
 
     invoiceListEl.innerHTML = output;
-
-/*
-5b.	Append this invoice to the user’s array of invoices (array of objects).
-    Also store the invoice to localStorage with the key called AllInvoices
-    (as an array of objects) to access later.
-*/
-    // Append invoice to user's array of invoices (b)
-    if (!user.invoices) {
-        user.invoices = [];
-    }
-    user.invoices.push(invoice);
-
-    // Save updated user back to localStorage (b)
-    localStorage.setItem("LoggedInUser", JSON.stringify(user));
-
-    // Append invoice to AllInvoices array and store in localStorage (b)
-    const allInvoices = JSON.parse(localStorage.getItem("AllInvoices") || "[]");
-    allInvoices.push(invoice);
-    localStorage.setItem("AllInvoices", JSON.stringify(allInvoices));
-
-    showInvoiceSentMessage();
-
-    // Clear cart
-    user.cart = [];
-    localStorage.setItem("LoggedInUser", JSON.stringify(user));
-    window.location.href = "index.html";
-
-    return invoice;
 }
 
 // === Requirement (c): Show invoice sent message ===
@@ -729,16 +665,6 @@ function showInvoiceSentMessage() {
     setTimeout(() => {
         document.body.removeChild(messageDiv);
     }, 4000);
-}
-
-// Run when invoice.html loads
-if (document.title.includes("Invoices")) {
-    loadInvoices();
-}
-
-// Load invoices when page loads
-if (document.title.includes("Invoices")) {
-    window.onload = loadInvoices;
 }
 
 function userFrequency() {
@@ -881,6 +807,8 @@ function GetUserInvoices() {
 ShowUserFrequency();
 ShowInvoices();
 }
+
+// ===== Unified Page Load Handler =====
 window.addEventListener("load", () => {
   if (document.title.includes("Invoices")) loadInvoices();
   if (document.title.includes("Checkout")) loadCheckoutCart();
