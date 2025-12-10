@@ -742,36 +742,46 @@ if (document.title.includes("Invoices")) {
 }
 
 function userFrequency() {
-    const user = [];
-    const form = document.getElementById('registerForm');
+    const uf_users = [];
 
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
+// Register form (if used on this page)
+const uf_form = document.getElementById('registerForm');
 
-      const name = document.getElementById('name').value.trim();
-      const age = parseInt(document.getElementById('age').value, 10);
-      const gender = document.getElementById('gender').value;
+if (uf_form) {
+    uf_form.addEventListener('submit', function (e) {
+        e.preventDefault();
 
-      if (!name || !age || !gender) return;
+        const name = document.getElementById('uf-name').value.trim();
+        const age = parseInt(document.getElementById('uf-age').value, 10);
+        const gender = document.getElementById('uf-gender').value;
 
-      // Save user data
-      users.push({ name, age, gender });
+        if (!name || !age || !gender) return;
 
-      // Clear form
-      form.reset();
+        // Save user data
+        uf_users.push({ name, age, gender });
 
-      // Update dashboard
-      updateDashboard();
+        // Clear form
+        uf_form.reset();
+
+        // Update dashboard
+        uf_updateDashboard();
     });
+}
 
-    function updateDashboard() {
-      // Gender counts
-      let male = 0, female = 0, other = 0;
 
-      // Age group counts
-      let age18_25 = 0, age26_35 = 0, age36_50 = 0, age50plus = 0;
+/* ============================================================
+   UPDATE USER FREQUENCY DASHBOARD
+============================================================ */
+function uf_updateDashboard() {
 
-      users.forEach(user => {
+    // Gender counters
+    let male = 0, female = 0, other = 0;
+
+    // Age groups
+    let age18_25 = 0, age26_35 = 0, age36_50 = 0, age50plus = 0;
+
+    uf_users.forEach(user => {
+
         // Gender
         if (user.gender === 'Male') male++;
         else if (user.gender === 'Female') female++;
@@ -782,25 +792,32 @@ function userFrequency() {
         else if (user.age >= 26 && user.age <= 35) age26_35++;
         else if (user.age >= 36 && user.age <= 50) age36_50++;
         else if (user.age > 50) age50plus++;
-      });
+    });
 
-      // Update gender cards
-      document.getElementById('maleCount').textContent = male;
-      document.getElementById('femaleCount').textContent = female;
-      document.getElementById('otherCount').textContent = other;
+    // Update gender counts
+    document.getElementById('uf-maleCount').textContent = male;
+    document.getElementById('uf-femaleCount').textContent = female;
+    document.getElementById('uf-otherCount').textContent = other;
 
-      // Update age table
-      document.getElementById('age18_25').textContent = age18_25;
-      document.getElementById('age26_35').textContent = age26_35;
-      document.getElementById('age36_50').textContent = age36_50;
-      document.getElementById('age50plus').textContent = age50plus;
-    }
+    // Update age groups
+    document.getElementById('uf-age18_25').textContent = age18_25;
+    document.getElementById('uf-age26_35').textContent = age26_35;
+    document.getElementById('uf-age36_50').textContent = age36_50;
+    document.getElementById('uf-age50plus').textContent = age50plus;
+}
 
-    function ShowInvoices() {
+
+
+/* ============================================================
+   SHOW ALL INVOICES
+============================================================ */
+function ShowInvoices() {
+
     let invoices = JSON.parse(localStorage.getItem("AllInvoices")) || [];
     console.log("All invoices:", invoices);
 
-    let table = document.getElementById("invoiceTable");
+    let table = document.getElementById("uf-invoiceTable");
+
     table.innerHTML = `
         <tr>
             <th>TRN</th><th>Name</th><th>Amount</th><th>Date</th>
@@ -819,18 +836,22 @@ function userFrequency() {
     });
 }
 
-/* -------------------------
+
+
+/* ============================================================
    SEARCH INVOICE BY TRN
---------------------------*/
+============================================================ */
 function searchInvoice() {
-    let searchTRN = document.getElementById("searchTRN").value.trim();
+
+    let searchTRN = document.getElementById("uf-searchTRN").value.trim();
     let invoices = JSON.parse(localStorage.getItem("AllInvoices")) || [];
 
     let result = invoices.filter(inv => inv.trn === searchTRN);
 
     console.log("Search result for TRN:", searchTRN, result);
 
-    let table = document.getElementById("invoiceTable");
+    let table = document.getElementById("uf-invoiceTable");
+
     table.innerHTML = `
         <tr><th>TRN</th><th>Name</th><th>Amount</th><th>Date</th></tr>
     `;
@@ -848,25 +869,28 @@ function searchInvoice() {
 }
 
 
-/* -------------------------
-   GET USER INVOICES
---------------------------*/
+
+/* ============================================================
+   GET INVOICES FOR ONE USER
+============================================================ */
 function GetUserInvoices() {
-    let trn = document.getElementById("userTRN").value.trim();
+
+    let trn = document.getElementById("uf-userTRN").value.trim();
     let invoices = JSON.parse(localStorage.getItem("AllInvoices")) || [];
 
     let userInvoices = invoices.filter(inv => inv.trn === trn);
 
     console.log("Invoices for user TRN:", trn, userInvoices);
 
-    let table = document.getElementById("userInvoiceTable");
+    let table = document.getElementById("uf-userInvoiceTable");
+
     table.innerHTML = `
         <tr><th>TRN</th><th>Name</th><th>Amount</th><th>Date</th></tr>
     `;
 
     userInvoices.forEach(inv => {
         table.innerHTML += `
-            <tr id="invoiceRow">
+            <tr>
                 <td>${inv.trn}</td>
                 <td>${inv.name}</td>
                 <td>${inv.amount}</td>
@@ -875,7 +899,6 @@ function GetUserInvoices() {
         `;
     });
 }
-
 
 // Load everything on page load
 ShowUserFrequency();
@@ -888,3 +911,4 @@ window.addEventListener("load", () => {
   loadCart();
   displayCheckout();
 });
+
