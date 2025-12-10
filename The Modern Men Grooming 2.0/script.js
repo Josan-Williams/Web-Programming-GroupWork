@@ -919,6 +919,7 @@ function GetUserInvoices() {
 document.addEventListener('DOMContentLoaded', () => {
     ShowUserFrequency();
     userRegistrationHandler();
+     ShowInvoices(); 
 })
 
 window.addEventListener("load", () => {
@@ -928,6 +929,7 @@ window.addEventListener("load", () => {
   loadCart();
   displayCheckout();
 });
+
 
 
 
