@@ -741,38 +741,18 @@ if (document.title.includes("Invoices")) {
     window.onload = loadInvoices;
 }
 
-function userFrequency() {
-    const uf_users = [];
+// ============================================================
+// USER FREQUENCY DASHBOARD
+// ============================================================
 
-// Register form (if used on this page)
-const uf_form = document.getElementById('registerForm');
-
-if (uf_form) {
-    uf_form.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const name = document.getElementById('uf-name').value.trim();
-        const age = parseInt(document.getElementById('uf-age').value, 10);
-        const gender = document.getElementById('uf-gender').value;
-
-        if (!name || !age || !gender) return;
-
-        // Save user data
-        uf_users.push({ name, age, gender });
-
-        // Clear form
-        uf_form.reset();
-
-        // Update dashboard
-        uf_updateDashboard();
-    });
+// Load users from RegistrationData
+function uf_getUsers() {
+    return JSON.parse(localStorage.getItem("RegistrationData")) || [];
 }
 
-
-/* ============================================================
-   UPDATE USER FREQUENCY DASHBOARD
-============================================================ */
-function uf_updateDashboard() {
+// Update the dashboard counters
+function ShowUserFrequency() {
+    const uf_users = uf_getUsers(); // get registered users
 
     // Gender counters
     let male = 0, female = 0, other = 0;
@@ -781,46 +761,83 @@ function uf_updateDashboard() {
     let age18_25 = 0, age26_35 = 0, age36_50 = 0, age50plus = 0;
 
     uf_users.forEach(user => {
-
-        // Gender
+        // Gender check (make sure matches exactly the registration value)
         if (user.gender === 'Male') male++;
         else if (user.gender === 'Female') female++;
         else other++;
 
-        // Age groups
-        if (user.age >= 18 && user.age <= 25) age18_25++;
-        else if (user.age >= 26 && user.age <= 35) age26_35++;
-        else if (user.age >= 36 && user.age <= 50) age36_50++;
-        else if (user.age > 50) age50plus++;
+        // Calculate age from date of birth
+        if (user.dob) {
+            const dob = new Date(user.dob);
+            const today = new Date();
+            let age = today.getFullYear() - dob.getFullYear();
+            const m = today.getMonth() - dob.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+                age--;
+            }
+
+            if (age >= 18 && age <= 25) age18_25++;
+            else if (age >= 26 && age <= 35) age26_35++;
+            else if (age >= 36 && age <= 50) age36_50++;
+            else if (age > 50) age50plus++;
+        }
     });
 
-    // Update gender counts
+    // Update gender counts in HTML
     document.getElementById('uf-maleCount').textContent = male;
     document.getElementById('uf-femaleCount').textContent = female;
     document.getElementById('uf-otherCount').textContent = other;
 
-    // Update age groups
+    // Update age groups in HTML
     document.getElementById('uf-age18_25').textContent = age18_25;
     document.getElementById('uf-age26_35').textContent = age26_35;
     document.getElementById('uf-age36_50').textContent = age36_50;
     document.getElementById('uf-age50plus').textContent = age50plus;
 }
 
+// Optional: update dashboard immediately after registration
+function userRegistrationHandler() {
+    const uf_form = document.getElementById('registerForm');
 
+    if (uf_form) {
+        uf_form.addEventListener('submit', function (e) {
+            e.preventDefault();
 
-/* ============================================================
-   SHOW ALL INVOICES
-============================================================ */
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const dob = document.getElementById('dob').value;
+            const gender = document.getElementById('gender').value;
+
+            if (!firstName || !lastName || !dob || !gender) return;
+
+            let registrations = JSON.parse(localStorage.getItem("RegistrationData")) || [];
+            registrations.push({
+                firstName,
+                lastName,
+                dob,
+                gender
+            });
+            localStorage.setItem("RegistrationData", JSON.stringify(registrations));
+
+            uf_form.reset();
+            ShowUserFrequency(); // update the dashboard immediately
+        });
+    }
+}
+
 function ShowInvoices() {
-
     let invoices = JSON.parse(localStorage.getItem("AllInvoices")) || [];
     console.log("All invoices:", invoices);
 
-    let table = document.getElementById("uf-invoiceTable");
+    const table = document.getElementById("uf-invoiceTable");
+    if (!table) return;
 
     table.innerHTML = `
         <tr>
-            <th>TRN</th><th>Name</th><th>Amount</th><th>Date</th>
+            <th>TRN</th>
+            <th>Invoice #</th>
+            <th>Total Amount</th>
+            <th>Date</th>
         </tr>
     `;
 
@@ -828,82 +845,82 @@ function ShowInvoices() {
         table.innerHTML += `
             <tr>
                 <td>${inv.trn}</td>
-                <td>${inv.name}</td>
-                <td>${inv.amount}</td>
-                <td>${inv.date}</td>
+                <td>${inv.invoiceNumber}</td>
+                <td>$${inv.total.toFixed(2)}</td>
+                <td>${inv.invoiceDate}</td>
             </tr>
         `;
     });
 }
 
-
-
-/* ============================================================
-   SEARCH INVOICE BY TRN
-============================================================ */
+// Search invoice by TRN
 function searchInvoice() {
+    const searchTRN = document.getElementById("uf-searchTRN").value.trim();
+    const invoices = JSON.parse(localStorage.getItem("AllInvoices")) || [];
 
-    let searchTRN = document.getElementById("uf-searchTRN").value.trim();
-    let invoices = JSON.parse(localStorage.getItem("AllInvoices")) || [];
+    const result = invoices.filter(inv => inv.trn === searchTRN);
 
-    let result = invoices.filter(inv => inv.trn === searchTRN);
-
-    console.log("Search result for TRN:", searchTRN, result);
-
-    let table = document.getElementById("uf-invoiceTable");
+    const table = document.getElementById("uf-invoiceTable");
+    if (!table) return;
 
     table.innerHTML = `
-        <tr><th>TRN</th><th>Name</th><th>Amount</th><th>Date</th></tr>
+        <tr>
+            <th>TRN</th>
+            <th>Invoice #</th>
+            <th>Total Amount</th>
+            <th>Date</th>
+        </tr>
     `;
 
     result.forEach(inv => {
         table.innerHTML += `
             <tr>
                 <td>${inv.trn}</td>
-                <td>${inv.name}</td>
-                <td>${inv.amount}</td>
-                <td>${inv.date}</td>
+                <td>${inv.invoiceNumber}</td>
+                <td>$${inv.total.toFixed(2)}</td>
+                <td>${inv.invoiceDate}</td>
             </tr>
         `;
     });
 }
 
-
-
-/* ============================================================
-   GET INVOICES FOR ONE USER
-============================================================ */
+// Get invoices for one user TRN
 function GetUserInvoices() {
+    const trn = document.getElementById("uf-userTRN").value.trim();
+    const invoices = JSON.parse(localStorage.getItem("AllInvoices")) || [];
 
-    let trn = document.getElementById("uf-userTRN").value.trim();
-    let invoices = JSON.parse(localStorage.getItem("AllInvoices")) || [];
+    const userInvoices = invoices.filter(inv => inv.trn === trn);
 
-    let userInvoices = invoices.filter(inv => inv.trn === trn);
-
-    console.log("Invoices for user TRN:", trn, userInvoices);
-
-    let table = document.getElementById("uf-userInvoiceTable");
+    const table = document.getElementById("uf-userInvoiceTable");
+    if (!table) return;
 
     table.innerHTML = `
-        <tr><th>TRN</th><th>Name</th><th>Amount</th><th>Date</th></tr>
+        <tr>
+            <th>TRN</th>
+            <th>Invoice #</th>
+            <th>Total Amount</th>
+            <th>Date</th>
+        </tr>
     `;
 
     userInvoices.forEach(inv => {
         table.innerHTML += `
             <tr>
                 <td>${inv.trn}</td>
-                <td>${inv.name}</td>
-                <td>${inv.amount}</td>
-                <td>${inv.date}</td>
+                <td>${inv.invoiceNumber}</td>
+                <td>$${inv.total.toFixed(2)}</td>
+                <td>${inv.invoiceDate}</td>
             </tr>
         `;
     });
 }
 
-// Load everything on page load
-ShowUserFrequency();
-ShowInvoices();
-}
+// Run dashboard update on page load
+document.addEventListener('DOMContentLoaded', () => {
+    ShowUserFrequency();
+    userRegistrationHandler();
+})
+
 window.addEventListener("load", () => {
   if (document.title.includes("Invoices")) loadInvoices();
   if (document.title.includes("Checkout")) loadCheckoutCart();
@@ -911,4 +928,6 @@ window.addEventListener("load", () => {
   loadCart();
   displayCheckout();
 });
+
+
 
