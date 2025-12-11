@@ -2,6 +2,7 @@ console.log("Script loaded succesfully.");
 
 let cart = JSON.parse(localStorage.getItem("cart"))||[];
 
+//actually display cart
 function displayCart() {
     const tableBody = document.getElementById("cartItems");
     const discountEl = document.getElementById("discount");
@@ -92,22 +93,10 @@ function displayCheckout() {
         totalTax += item.tax * item.qty;
         totalDiscount += item.discount * item.qty;
     });
-
-    const total = subtotal + totalTax - totalDiscount;
-
-    const subtotalEl = document.getElementById("checkoutSubtotal");
-    const taxEl = document.getElementById("checkoutTax");
-    const discountEl = document.getElementById("checkoutDiscount");
-    const totalEl = document.getElementById("checkoutTotal");
-
-    if (subtotalEl) subtotalEl.innerText = subtotal.toFixed(2);
-    if (taxEl) taxEl.innerText = totalTax.toFixed(2);
-    if (discountEl) discountEl.innerText = totalDiscount.toFixed(2);
-    if (totalEl) totalEl.innerText = total.toFixed(2);
 }
 
 if (document.title.includes("Checkout")) {
-    displayCheckout();
+    loadCheckoutCart();
 }
 
 function cancelOrder() {
@@ -476,6 +465,7 @@ function cancelOrder() {
     window.location.href = "cart.html";
 }
 
+//actually load checkout cart
 function loadCheckoutCart() {
     const userJSON = localStorage.getItem("LoggedInUser");
     if (!userJSON) return;
@@ -501,6 +491,7 @@ function loadCheckoutCart() {
 
         tbody.innerHTML += `
             <tr>
+                <td><img src="${item.image}" width="60" alt="${item.name}"></td>
                 <td>${item.name}</td>
                 <td>${item.qty}</td>
                 <td>$${item.price.toFixed(2)}</td>
@@ -509,9 +500,19 @@ function loadCheckoutCart() {
         `;
     });
 
-    document.getElementById("checkoutDiscount").innerText = totalDiscount.toFixed(2);
-    document.getElementById("checkoutTax").innerText = totalTax.toFixed(2);
-    document.getElementById("checkoutTotal").innerText = ((subtotal + totalTax) - totalDiscount).toFixed(2);
+    const discount = subtotal * 0.10; // 10% discount
+    const tax = subtotal * 0.15; // 15% tax
+    const total = subtotal - discount + tax;
+
+    const subtotalEl = document.getElementById("checkoutSubtotal");
+    const taxEl = document.getElementById("checkoutTax");
+    const discountEl = document.getElementById("checkoutDiscount");
+    const totalEl = document.getElementById("checkoutTotal");
+
+    if (subtotalEl) subtotalEl.innerText = subtotal.toFixed(2);
+    if (taxEl) taxEl.innerText = tax.toFixed(2);
+    if (discountEl) discountEl.innerText = discount.toFixed(2);
+    if (totalEl) totalEl.innerText = total.toFixed(2);
 }
 
 // === Load and Display Invoices ===
