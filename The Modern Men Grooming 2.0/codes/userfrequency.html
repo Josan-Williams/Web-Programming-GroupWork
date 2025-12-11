@@ -4,23 +4,10 @@
   <meta charset="UTF-8" />
   <title>User Frequency Dashboard</title>
   <link rel="stylesheet" href="../style.css">
-    <script defer src="script.js"></script>
-  <style>
-    
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    h2 { margin-top: 40px; }
-
-    
-    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-    th, td { border: 1px solid var(--secondary); padding: 6px 10px; text-align: center; }
-    th { background-color: var(--secondary); }
-    label { display: block; margin-top: 10px; }
-    input, select, button { margin-top: 5px; padding: 6px 8px; }
-  </style>
-</head>
-
-<body>
-    <header class="navbar">
+    <script defer src="../script.js"></script>
+  
+ <body id="uf-body">
+  <header class="uf-header">
     <h1>The Mordern Man Grooming</h1>
     <nav>
      <a href="index.html">Home</a>
@@ -34,230 +21,88 @@
      <a href="about.html">About Us</a>
     </nav>
   </header>
-
-
   <!-- Dashboard -->
-  <h2>User Frequency Dashboard</h2>
+<h2 class="uf-heading">User Frequency Dashboard</h2>
 
-  <!-- Gender cards -->
-  <div class="container" id="genderCards">
-    <div class="card">
-      <h3>Male</h3>
-      <p id="maleCount">0</p>
+<!-- Gender Cards -->
+<div class="uf-container" id="uf-genderCards">
+    <div class="uf-card">
+        <h3 class="uf-card-title">Male</h3>
+        <p id="uf-maleCount">0</p>
     </div>
-    <div class="card">
-      <h3>Female</h3>
-      <p id="femaleCount">0</p>
+    <div class="uf-card">
+        <h3 class="uf-card-title">Female</h3>
+        <p id="uf-femaleCount">0</p>
     </div>
-    <div class="card">
-      <h3>Other</h3>
-      <p id="otherCount">0</p>
+    <div class="uf-card">
+        <h3 class="uf-card-title">Other</h3>
+        <p id="uf-otherCount">0</p>
     </div>
-  </div>
+</div>
 
-  <!-- Age group table -->
-  <h3>Age Groups</h3>
-  <table id="ufTable">
+<!-- Age Table -->
+<h3 class="uf-subheading">Age Groups</h3>
+
+<table class="uf-table" id="uf-ageTable">
     <thead>
-      <tr>
-        <th>Age Group</th>
-        <th>Count</th>
-      </tr>
+        <tr>
+            <th>Age Group</th>
+            <th>Count</th>
+        </tr>
     </thead>
     <tbody>
-      <tr>
-        <td>18–25</td>
-        <td id="age18_25">0</td>
-      </tr>
-      <tr>
-        <td>26–35</td>
-        <td id="age26_35">0</td>
-      </tr>
-      <tr>
-        <td>36–50</td>
-        <td id="age36_50">0</td>
-      </tr>
-      <tr>
-        <td>50+</td>
-        <td id="age50plus">0</td>
-      </tr>
+        <tr>
+            <td>18–25</td>
+            <td id="uf-age18_25">0</td>
+        </tr>
+        <tr>
+            <td>26–35</td>
+            <td id="uf-age26_35">0</td>
+        </tr>
+        <tr>
+            <td>36–50</td>
+            <td id="uf-age36_50">0</td>
+        </tr>
+        <tr>
+            <td>50+</td>
+            <td id="uf-age50plus">0</td>
+        </tr>
     </tbody>
-  </table>
+</table>
 <br>
-  <div class="container">
-    <h2 id="tableHeader2">All Invoices</h2>
 
-    <input type="text" id="searchTRN" placeholder="Search by TRN">
+<!-- Invoice Tables -->
+<div class="uf-container">
+    <h2 class="uf-heading">All Invoices</h2>
+
+    <input type="text" id="uf-searchTRN" placeholder="Search by TRN">
     <button onclick="ShowInvoices()">Show All</button>
     <button onclick="searchInvoice()">Search</button>
 
-    <table id="invoiceTable">
+    <table class="uf-table" id="uf-invoiceTable">
         <tr>
-            <th id="tableHeader">TRN</th>
-            <th id="tableHeader">Name</th>
-            <th id="tableHeader">Amount</th>
-            <th id="tableHeader">Date</th>
+            <th>TRN</th>
+            <th>Name</th>
+            <th>Amount</th>
+            <th>Date</th>
         </tr>
     </table>
 </div>
 
-<div class="container">
-    <h2  id="tableHeader2">User Invoice Lookup</h2>
+<div class="uf-container">
+    <h2 class="uf-heading">User Invoice Lookup</h2>
 
-    <input type="text" id="userTRN" placeholder="Enter User TRN">
+    <input type="text" id="uf-userTRN" placeholder="Enter User TRN">
     <button onclick="GetUserInvoices()">Get User Invoices</button>
 
-    <table id="userInvoiceTable">
+    <table class="uf-table" id="uf-userInvoiceTable">
         <tr>
-            <th id="tableHeader">TRN</th>
-            <th id="tableHeader">Name</th>
-            <th id="tableHeader">Amount</th>
-            <th id="tableHeader">Date</th>
+            <th>TRN</th>
+            <th>Name</th>
+            <th>Amount</th>
+            <th>Date</th>
         </tr>
     </table>
 </div>
-
-  <script>
-    // In-memory array of registered users
-    const users = [];
-
-    const form = document.getElementById('registerForm');
-
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-
-      const name = document.getElementById('name').value.trim();
-      const age = parseInt(document.getElementById('age').value, 10);
-      const gender = document.getElementById('gender').value;
-
-      if (!name || !age || !gender) return;
-
-      // Save user data
-      users.push({ name, age, gender });
-
-      // Clear form
-      form.reset();
-
-      // Update dashboard
-      updateDashboard();
-    });
-
-    function updateDashboard() {
-      // Gender counts
-      let male = 0, female = 0, other = 0;
-
-      // Age group counts
-      let age18_25 = 0, age26_35 = 0, age36_50 = 0, age50plus = 0;
-
-      users.forEach(user => {
-        // Gender
-        if (user.gender === 'Male') male++;
-        else if (user.gender === 'Female') female++;
-        else other++;
-
-        // Age groups
-        if (user.age >= 18 && user.age <= 25) age18_25++;
-        else if (user.age >= 26 && user.age <= 35) age26_35++;
-        else if (user.age >= 36 && user.age <= 50) age36_50++;
-        else if (user.age > 50) age50plus++;
-      });
-
-      // Update gender cards
-      document.getElementById('maleCount').textContent = male;
-      document.getElementById('femaleCount').textContent = female;
-      document.getElementById('otherCount').textContent = other;
-
-      // Update age table
-      document.getElementById('age18_25').textContent = age18_25;
-      document.getElementById('age26_35').textContent = age26_35;
-      document.getElementById('age36_50').textContent = age36_50;
-      document.getElementById('age50plus').textContent = age50plus;
-    }
-    function ShowInvoices() {
-    let invoices = JSON.parse(localStorage.getItem("AllInvoices")) || [];
-    console.log("All invoices:", invoices);
-
-    let table = document.getElementById("invoiceTable");
-    table.innerHTML = `
-        <tr>
-            <th>TRN</th><th>Name</th><th>Amount</th><th>Date</th>
-        </tr>
-    `;
-
-    invoices.forEach(inv => {
-        table.innerHTML += `
-            <tr>
-                <td>${inv.trn}</td>
-                <td>${inv.name}</td>
-                <td>${inv.amount}</td>
-                <td>${inv.date}</td>
-            </tr>
-        `;
-    });
-}
-
-
-/* -------------------------
-   SEARCH INVOICE BY TRN
---------------------------*/
-function searchInvoice() {
-    let searchTRN = document.getElementById("searchTRN").value.trim();
-    let invoices = JSON.parse(localStorage.getItem("AllInvoices")) || [];
-
-    let result = invoices.filter(inv => inv.trn === searchTRN);
-
-    console.log("Search result for TRN:", searchTRN, result);
-
-    let table = document.getElementById("invoiceTable");
-    table.innerHTML = `
-        <tr><th>TRN</th><th>Name</th><th>Amount</th><th>Date</th></tr>
-    `;
-
-    result.forEach(inv => {
-        table.innerHTML += `
-            <tr>
-                <td>${inv.trn}</td>
-                <td>${inv.name}</td>
-                <td>${inv.amount}</td>
-                <td>${inv.date}</td>
-            </tr>
-        `;
-    });
-}
-
-
-/* -------------------------
-   GET USER INVOICES
---------------------------*/
-function GetUserInvoices() {
-    let trn = document.getElementById("userTRN").value.trim();
-    let invoices = JSON.parse(localStorage.getItem("AllInvoices")) || [];
-
-    let userInvoices = invoices.filter(inv => inv.trn === trn);
-
-    console.log("Invoices for user TRN:", trn, userInvoices);
-
-    let table = document.getElementById("userInvoiceTable");
-    table.innerHTML = `
-        <tr><th>TRN</th><th>Name</th><th>Amount</th><th>Date</th></tr>
-    `;
-
-    userInvoices.forEach(inv => {
-        table.innerHTML += `
-            <tr>
-                <td>${inv.trn}</td>
-                <td>${inv.name}</td>
-                <td>${inv.amount}</td>
-                <td>${inv.date}</td>
-            </tr>
-        `;
-    });
-}
-
-
-// Load everything on page load
-ShowUserFrequency();
-ShowInvoices();
-  </script>
 </body>
 </html>

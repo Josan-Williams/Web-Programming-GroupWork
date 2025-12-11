@@ -441,4 +441,91 @@ button {
   }
 }
 
+#uf-body {
+    background-color: black;
+    color: white;
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
 
+/* Headings */
+.uf-heading,
+.uf-subheading {
+    color: gold;
+    margin-top: 40px;
+}
+
+/* Containers */
+.uf-container {
+    margin-top: 20px;
+}
+.uf-nav {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    padding-right: 20px;
+}
+
+.uf-nav a {
+    color: black;
+    background: gold;
+    padding: 8px 14px;
+    border-radius: 12px;
+    text-decoration: none;     
+    font-weight: 600;
+    transition: 0.25s;
+}
+
+.uf-nav a:hover {
+    background: white;
+    color: gold
+}
+
+/* Cards */
+.uf-card {
+    background-color: #111;
+    padding: 15px;
+    border: 1px solid white;
+    border-radius: 8px;
+    display: inline-block;
+    margin-right: 20px;
+}
+
+.uf-card-title {
+    color: gold;
+}
+
+/* Tables */
+.uf-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: black;
+    margin-top: 10px;
+}
+
+.uf-table th,
+.uf-table td {
+    border: 1px solid white;
+    padding: 6px 10px;
+    text-align: center;
+    color: gold;
+}
+
+/* Inputs */
+#uf-searchTRN,
+#uf-userTRN {
+    background-color: black;
+    color: white;
+    border: 1px solid white;
+    padding: 6px 8px;
+    margin-top: 5px;
+}
+
+/* Buttons */
+button {
+    margin-top: 5px;
+    padding: 6px 8px;
+    background-color: black;
+    color: white;
+    border: 1px solid gold;
+}

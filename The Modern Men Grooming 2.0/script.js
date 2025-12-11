@@ -79,15 +79,31 @@ function goCheckout(){
 }
 
 function displayCheckout() {
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
-    let total = 0;
+    const userJSON = localStorage.getItem("LoggedInUser");
+    if (!userJSON) return;
 
-    cart.forEach(item => {
-        total += item.price * item.qty;
+    const user = JSON.parse(userJSON);
+    if (!user.cart || user.cart.length === 0) return;
+
+    let subtotal = 0, totalTax = 0, totalDiscount = 0;
+
+    user.cart.forEach(item => {
+        subtotal += item.price * item.qty;
+        totalTax += item.tax * item.qty;
+        totalDiscount += item.discount * item.qty;
     });
 
-    document.getElementById("checkoutTotal").innerText =
-        "Total: $" + total.toFixed(2);
+    const total = subtotal + totalTax - totalDiscount;
+
+    const subtotalEl = document.getElementById("checkoutSubtotal");
+    const taxEl = document.getElementById("checkoutTax");
+    const discountEl = document.getElementById("checkoutDiscount");
+    const totalEl = document.getElementById("checkoutTotal");
+
+    if (subtotalEl) subtotalEl.innerText = subtotal.toFixed(2);
+    if (taxEl) taxEl.innerText = totalTax.toFixed(2);
+    if (discountEl) discountEl.innerText = totalDiscount.toFixed(2);
+    if (totalEl) totalEl.innerText = total.toFixed(2);
 }
 
 if (document.title.includes("Checkout")) {
@@ -159,8 +175,7 @@ function handleRegister(event) {
     errorEl.textContent = "";
     successEl.textContent = "";
 
-    // ii. HTML validation already ensures required fields,
-    // but we'll add JS error messages too.
+    // ii. HTML validation ensures required fields.
 
     // iii. Password must be at least 8 characters
     if (password.length < 8) {
@@ -363,52 +378,6 @@ function addToCart(productID) {
   alert(`${item.name} added to cart!`);
 }
 
-// ===== Display Cart =====
-function loadCart() {
-  const tableBody = document.getElementById("cartItems");
-  const totalBox = document.getElementById("totalDisplay");
-
-  if (!tableBody || !totalBox) return;
-
-  const userJSON = localStorage.getItem("LoggedInUser");
-  if (!userJSON) {
-    tableBody.innerHTML = "<tr><td colspan='6'>Please log in to see your cart.</td></tr>";
-    totalBox.innerHTML = "";
-    return;
-  }
-
-  const user = JSON.parse(userJSON);
-  if (!user.cart || user.cart.length === 0) {
-    tableBody.innerHTML = "<tr><td colspan='6'>Your cart is empty.</td></tr>";
-    totalBox.innerHTML = "";
-    return;
-  }
-
-  let output = "";
-  let total = 0;
-
-  user.cart.forEach((item, index) => {
-    total += item.finalPrice * item.qty;
-
-    output += `
-      <tr>
-        <td><img src="${item.image}" alt="${item.name}" width="60"></td>
-        <td>${item.name}</td>
-        <td>$${item.price.toFixed(2)}</td>
-        <td>${item.qty}</td>
-        <td>
-          <button onclick="increaseQty(${index})">+</button>
-          <button onclick="decreaseQty(${index})">-</button>
-        </td>
-        <td>$${(item.finalPrice * item.qty).toFixed(2)}</td>
-      </tr>
-    `;
-  });
-
-  tableBody.innerHTML = output;
-  totalBox.innerHTML = `<strong>Total: $${total.toFixed(2)}</strong>`;
-}
-
 // ===== Increase / Decrease Quantity =====
 function increaseQty(index) {
     const user = JSON.parse(localStorage.getItem("LoggedInUser"));
@@ -436,17 +405,6 @@ function goCheckout() {
   window.location.href = "checkout.html";
 }
 
-function displayCheckout() {
-  const user = JSON.parse(localStorage.getItem("LoggedInUser"));
-  if (!user || !user.cart) return;
-
-  let total = 0;
-  user.cart.forEach(item => total += item.price * item.qty);
-
-  const totalEl = document.getElementById("checkoutTotal");
-  if (totalEl) totalEl.innerText = "Total: $" + total.toFixed(2);
-}
-
 function confirmOrder() {
     const userJSON = localStorage.getItem("LoggedInUser");
     if (!userJSON) return alert("No user logged in.");
@@ -464,7 +422,7 @@ function confirmOrder() {
     };
     user.shippingInfo = shippingInfo;
 
-    const companyName = "The Modern Man Grooming";
+    const companyName = "The Modern Men Grooming 2.0";
     const invoiceDate = new Date().toLocaleString();
     const invoiceNumber = "INV-" + Date.now();
     const trn = user.trn;
@@ -510,6 +468,7 @@ function confirmOrder() {
     localStorage.setItem("LoggedInUser", JSON.stringify(user));
 
     alert("Order confirmed! Invoice generated and sent to your email.");
+    showInvoiceSentMessage();
     window.location.href = "index.html";
 }
 
@@ -536,7 +495,7 @@ function loadCheckoutCart() {
 
     user.cart.forEach(item => {
         const itemSubtotal = item.price * item.qty;
-        subtotal += itemSubtotal;
+        subtotal += item.price * item.qty;
         totalTax += item.tax * item.qty;
         totalDiscount += item.discount * item.qty;
 
@@ -667,69 +626,120 @@ function showInvoiceSentMessage() {
     }, 4000);
 }
 
-function userFrequency() {
-    const user = [];
-    const form = document.getElementById('registerForm');
+// Run when invoice.html loads
+if (document.title.includes("Invoices")) {
+    loadInvoices();
+}
 
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
+// Load invoices when page loads
+if (document.title.includes("Invoices")) {
+    window.onload = loadInvoices;
+}
 
-      const name = document.getElementById('name').value.trim();
-      const age = parseInt(document.getElementById('age').value, 10);
-      const gender = document.getElementById('gender').value;
+// ============================================================
+// USER FREQUENCY DASHBOARD
+// ============================================================
 
-      if (!name || !age || !gender) return;
+// Load users from RegistrationData
+function uf_getUsers() {
+    return JSON.parse(localStorage.getItem("RegistrationData")) || [];
+}
 
-      // Save user data
-      users.push({ name, age, gender });
+// Update the dashboard counters
+function ShowUserFrequency() {
+    const uf_users = uf_getUsers(); // get registered users
 
-      // Clear form
-      form.reset();
+    // Gender counters
+    let male = 0, female = 0, other = 0;
 
-      // Update dashboard
-      updateDashboard();
-    });
+    // Age groups
+    let age18_25 = 0, age26_35 = 0, age36_50 = 0, age50plus = 0;
 
-    function updateDashboard() {
-      // Gender counts
-      let male = 0, female = 0, other = 0;
-
-      // Age group counts
-      let age18_25 = 0, age26_35 = 0, age36_50 = 0, age50plus = 0;
-
-      users.forEach(user => {
-        // Gender
+    uf_users.forEach(user => {
+        // Gender check (make sure matches exactly the registration value)
         if (user.gender === 'Male') male++;
         else if (user.gender === 'Female') female++;
         else other++;
 
-        // Age groups
-        if (user.age >= 18 && user.age <= 25) age18_25++;
-        else if (user.age >= 26 && user.age <= 35) age26_35++;
-        else if (user.age >= 36 && user.age <= 50) age36_50++;
-        else if (user.age > 50) age50plus++;
-      });
+        // Calculate age from date of birth
+        if (user.dob) {
+            const dob = new Date(user.dob);
+            const today = new Date();
+            let age = today.getFullYear() - dob.getFullYear();
+            const m = today.getMonth() - dob.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+                age--;
+            }
 
-      // Update gender cards
-      document.getElementById('maleCount').textContent = male;
-      document.getElementById('femaleCount').textContent = female;
-      document.getElementById('otherCount').textContent = other;
+            if (age >= 18 && age <= 25) age18_25++;
+            else if (age >= 26 && age <= 35) age26_35++;
+            else if (age >= 36 && age <= 50) age36_50++;
+            else if (age > 50) age50plus++;
+        }
+    });
 
-      // Update age table
-      document.getElementById('age18_25').textContent = age18_25;
-      document.getElementById('age26_35').textContent = age26_35;
-      document.getElementById('age36_50').textContent = age36_50;
-      document.getElementById('age50plus').textContent = age50plus;
+    // Update gender counts in HTML (with null checks)
+    const maleEl = document.getElementById('uf-maleCount');
+    if (maleEl) maleEl.textContent = male;
+    const femaleEl = document.getElementById('uf-femaleCount');
+    if (femaleEl) femaleEl.textContent = female;
+    const otherEl = document.getElementById('uf-otherCount');
+    if (otherEl) otherEl.textContent = other;
+
+    // Update age groups in HTML (with null checks)
+    const age18_25El = document.getElementById('uf-age18_25');
+    if (age18_25El) age18_25El.textContent = age18_25;
+    const age26_35El = document.getElementById('uf-age26_35');
+    if (age26_35El) age26_35El.textContent = age26_35;
+    const age36_50El = document.getElementById('uf-age36_50');
+    if (age36_50El) age36_50El.textContent = age36_50;
+    const age50plusEl = document.getElementById('uf-age50plus');
+    if (age50plusEl) age50plusEl.textContent = age50plus;
+}
+
+// Optional: update dashboard immediately after registration
+function userRegistrationHandler() {
+    const uf_form = document.getElementById('registerForm');
+
+    if (uf_form) {
+        uf_form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const dob = document.getElementById('dob').value;
+            const gender = document.getElementById('gender').value;
+
+            if (!firstName || !lastName || !dob || !gender) return;
+
+            let registrations = JSON.parse(localStorage.getItem("RegistrationData")) || [];
+            registrations.push({
+                firstName,
+                lastName,
+                dob,
+                gender
+            });
+            localStorage.setItem("RegistrationData", JSON.stringify(registrations));
+
+            uf_form.reset();
+            ShowUserFrequency(); // update the dashboard immediately
+        });
     }
+}
 
-    function ShowInvoices() {
+function ShowInvoices() {
     let invoices = JSON.parse(localStorage.getItem("AllInvoices")) || [];
     console.log("All invoices:", invoices);
 
-    let table = document.getElementById("invoiceTable");
+    const table = document.getElementById("uf-invoiceTable");
+    if (!table) return;
+
     table.innerHTML = `
         <tr>
-            <th>TRN</th><th>Name</th><th>Amount</th><th>Date</th>
+            <th>TRN</th>
+            <th>Invoice #</th>
+            <th>Total Amount</th>
+            <th>Date</th>
         </tr>
     `;
 
@@ -737,82 +747,86 @@ function userFrequency() {
         table.innerHTML += `
             <tr>
                 <td>${inv.trn}</td>
-                <td>${inv.name}</td>
-                <td>${inv.amount}</td>
-                <td>${inv.date}</td>
+                <td>${inv.invoiceNumber}</td>
+                <td>$${inv.total.toFixed(2)}</td>
+                <td>${inv.invoiceDate}</td>
             </tr>
         `;
     });
 }
 
-/* -------------------------
-   SEARCH INVOICE BY TRN
---------------------------*/
+// Search invoice by TRN
 function searchInvoice() {
-    let searchTRN = document.getElementById("searchTRN").value.trim();
-    let invoices = JSON.parse(localStorage.getItem("AllInvoices")) || [];
+    const searchTRN = document.getElementById("uf-searchTRN").value.trim();
+    const invoices = JSON.parse(localStorage.getItem("AllInvoices")) || [];
 
-    let result = invoices.filter(inv => inv.trn === searchTRN);
+    const result = invoices.filter(inv => inv.trn === searchTRN);
 
-    console.log("Search result for TRN:", searchTRN, result);
+    const table = document.getElementById("uf-invoiceTable");
+    if (!table) return;
 
-    let table = document.getElementById("invoiceTable");
     table.innerHTML = `
-        <tr><th>TRN</th><th>Name</th><th>Amount</th><th>Date</th></tr>
+        <tr>
+            <th>TRN</th>
+            <th>Invoice #</th>
+            <th>Total Amount</th>
+            <th>Date</th>
+        </tr>
     `;
 
     result.forEach(inv => {
         table.innerHTML += `
             <tr>
                 <td>${inv.trn}</td>
-                <td>${inv.name}</td>
-                <td>${inv.amount}</td>
-                <td>${inv.date}</td>
+                <td>${inv.invoiceNumber}</td>
+                <td>$${inv.total.toFixed(2)}</td>
+                <td>${inv.invoiceDate}</td>
             </tr>
         `;
     });
 }
 
-
-/* -------------------------
-   GET USER INVOICES
---------------------------*/
+// Get invoices for one user TRN
 function GetUserInvoices() {
-    let trn = document.getElementById("userTRN").value.trim();
-    let invoices = JSON.parse(localStorage.getItem("AllInvoices")) || [];
+    const trn = document.getElementById("uf-userTRN").value.trim();
+    const invoices = JSON.parse(localStorage.getItem("AllInvoices")) || [];
 
-    let userInvoices = invoices.filter(inv => inv.trn === trn);
+    const userInvoices = invoices.filter(inv => inv.trn === trn);
 
-    console.log("Invoices for user TRN:", trn, userInvoices);
+    const table = document.getElementById("uf-userInvoiceTable");
+    if (!table) return;
 
-    let table = document.getElementById("userInvoiceTable");
     table.innerHTML = `
-        <tr><th>TRN</th><th>Name</th><th>Amount</th><th>Date</th></tr>
+        <tr>
+            <th>TRN</th>
+            <th>Invoice #</th>
+            <th>Total Amount</th>
+            <th>Date</th>
+        </tr>
     `;
 
     userInvoices.forEach(inv => {
         table.innerHTML += `
-            <tr id="invoiceRow">
+            <tr>
                 <td>${inv.trn}</td>
-                <td>${inv.name}</td>
-                <td>${inv.amount}</td>
-                <td>${inv.date}</td>
+                <td>${inv.invoiceNumber}</td>
+                <td>$${inv.total.toFixed(2)}</td>
+                <td>${inv.invoiceDate}</td>
             </tr>
         `;
     });
 }
 
+// Run dashboard update on page load
+document.addEventListener('DOMContentLoaded', () => {
+    ShowUserFrequency();
+    userRegistrationHandler();
+     ShowInvoices(); 
+})
 
-// Load everything on page load
-ShowUserFrequency();
-ShowInvoices();
-}
-
-// ===== Unified Page Load Handler =====
 window.addEventListener("load", () => {
   if (document.title.includes("Invoices")) loadInvoices();
   if (document.title.includes("Checkout")) loadCheckoutCart();
   loadProducts();
-  loadCart();
   displayCheckout();
 });
